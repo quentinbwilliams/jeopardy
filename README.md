@@ -22,3 +22,8 @@ When the user clicks the “Restart” button at the bottom of the page, it shou
 We’ve provided an HTML file and CSS for the application (you shouldn’t change the HTML file; if you want to tweak any CSS things, feel free to).
 
 We’ve also provided a starter JS file with function definitions. Implement these functions to meet the required functionality.
+
+## Time log
+
+Start: 7/9/21 9:45am
+    stop: 12:40
