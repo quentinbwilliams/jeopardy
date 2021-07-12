@@ -12,20 +12,17 @@ class Category {
 }
 
 class Jeopardy {
-    numQuestions = 5;
-    numCategories = 6;
     categories = [];
-    categoryIDs = [];
     initCategories() {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i <= 6; i++) { // hard code number of categories to 6
             let category = new Category;
             category.getData()
             this.categories.push(category)
         }
     }
     async initClues() {
-        for (let i = 0; i < 6; i++) {
-            let id = this.categories[i].id
+        for (let i = 0; i <= 6; i++) {
+            let id = this.categories[i].id;
             let responseWithClues = await axios.get('https://www.jservice.io/api/clues', {
                 params: {
                     category: id
@@ -33,7 +30,15 @@ class Jeopardy {
             })
             let clues = responseWithClues.data
             this.categories[i]['clues'] = clues
-            this.categoryIDs.push(id)
+
         }
+      this.categories.shift() // ID of first category wasn't being stored so I made an extra Category instance and then shift first category off categories array
     }
+}
+
+function init() {
+    let jeopardyGame = new Jeopardy;
+    jeopardyGame.initCategories();
+    jeopardyGame.initClues();
+    return jeopardyGame
 }
