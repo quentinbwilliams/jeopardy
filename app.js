@@ -23,9 +23,16 @@ class Jeopardy {
             this.categories.push(category)
         }
     }
-    initClues() {
+    async initClues() {
         for (let i = 0; i < 6; i++) {
             let id = this.categories[i].id
+            let responseWithClues = await axios.get('https://www.jservice.io/api/clues', {
+                params: {
+                    category: id
+                }
+            })
+            let clues = responseWithClues.data
+            this.categories[i]['clues'] = clues
             this.categoryIDs.push(id)
         }
     }
