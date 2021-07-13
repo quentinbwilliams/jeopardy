@@ -5,3 +5,35 @@
   #8d2ab5
   #74119c
 */
+
+table {
+  width: 100%;
+  height: 100%;
+  border: 3px solid blue;
+  /* position: relative; */
+} 
+
+th {
+  height: 80px;
+  width: 80px;
+  position: relative;
+  text-align: center;
+  top: 0;
+}
+
+tr {
+  height: 30px;
+}
+
+div {
+  /* margin: auto; */
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  /* border: 2px solid blue; */
+  bottom: 0;
+}
+
+div:hover {
+  background-color: lightskyblue;
+}
