@@ -8,15 +8,14 @@
 
 table {
   width: 100%;
-  height: 100%;
-  border: 3px solid blue;
+  height: auto;
+  border: 3px solid black;
   /* position: relative; */
 } 
 
 th {
   height: 80px;
   width: 80px;
-  position: relative;
   text-align: center;
   top: 0;
 }
@@ -26,12 +25,11 @@ tr {
 }
 
 div {
-  /* margin: auto; */
-  height: 100%;
-  width: 100%;
+  display: table;
   text-align: center;
-  /* border: 2px solid blue; */
+  border: 1px solid black;
   bottom: 0;
+  border: 2px solid black;
 }
 
 div:hover {
