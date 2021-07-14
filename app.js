@@ -1,50 +1,42 @@
 /*
-  Create a new JeopardyGame instance to play Jeopardy in the browser.
-  There are three classes:
-    Category class - Creates a new random category
-      -> .getData() makes request to jservice API for a random category.
-    Jeopardy class - Creates new Category instances and makes a request to jservice API for clues to go with the categories.
-      -> .initCategories() initializes new category objects; calls .initClues().
-      -> .initClues() adds clues to each category object.
-    BrowserJeopardy class - Extends Jeopardy with UI functionality.
-      -> .makeTable() - Renders game data in a Jeopardy game table
+  Play Jeopardy-based trivia in the browser!
+  There are two classes:
+    Jeopardy Class - Creates six random category instances, then makes a request to the jservice API to get clues for each category.
+      -> .initCategories(): 
+        --> Gets six random clues
+        --> Parses out the category data for each clue
+        --> Pushes the category data to a categories array
+        --> Loops through categories array to request clues using each category id
+        --> Adds 5 clues to each category object
+    BrowserJeopardy Class - Extends Jeopardy with UI functionality.
+      -> .makeTable():
+        --> Async function awaits .initCategories() call
+        --> On initCategories() completion, creates table for the game, table     
+            headings for the categories, and divs with clues appended to each category heading
+        --> Adds event listener to each div that displays the answer on click
+  Two global vairables:
+    -> games
+      --> Array to store each instance of BrowserJeopardy
+    -> startButton
+      --> Runs init() to start a new game
+  And one global function:
+    -> init():
+      --> Creates a new instance of BrowserJeopardy as game
+      --> Calls game.makeTable() to initialize categories and render board UI
+      --> Pushes game instance to global games array
+      --> Returns game
 */
 
-startButton = document.createElement("button");
-startButton.innerText = "Start Jeopardy";
-document.body.append(startButton);
+const games = [];
+const startButton = document.getElementById('start-button');
 startButton.addEventListener("click", init);
 
 function init() {
   // Create new game instance from BrowserJeopardy class
-  const jeopardyGame = new BrowserJeopardy();
-  jeopardyGame.initCategories();
-  setTimeout(function () {
-    jeopardyGame.makeTable();
-  }, 2000); // account for time it takes to make request and shift first category // Could I run an async Fn here?
-  games.push(jeopardyGame);
-  return jeopardyGame;
-}
-
-const games = [];
-
-class Category {
-  /*
-    Category stores data about a random Jeopardy category.
-    Create a new category instance and call .getData() to populate the Category object with a title, id, and array of clues.
-  */
-  async getData() {
-    /*
-      Make a request to jservice API for a random clue.
-      Extract the title and id from the clue.
-      Set the title and id of object instance as title and id from random clue.
-    */
-    let response = await axios.get("https://www.jservice.io/api/random");
-    let data = response.data[0];
-    this.title = data.category.title;
-    this.id = data.category.id;
-    return this.title, this.id;
-  }
+  let game = new BrowserJeopardy();
+  game.makeTable()
+  games.push(game);
+  return game;
 }
 
 class Jeopardy {
@@ -54,28 +46,25 @@ class Jeopardy {
   Each category object has a title and id; the category id is used to make a request to the jservice API for clues from that category.
   */
   categories = [];
-  initCategories() {
+  async initCategories() {
     /*
-      Create 7 instances of the Category object. (We create 7 rather than 6 to account for a bug that doesn't retrieve the ID of the first category).
-      Push each category obejct to the categories array stored in JeopardyGame object.
+      Make a request to jservice API for 6 random categories.
+      Then, request clues for each category.
     */
-    for (let i = 0; i <= 6; i++) {
-      let category = new Category();
-      category.getData();
+    let response = await axios.get("https://www.jservice.io/api/random/", {
+      // making request to /random and not /categories because /categories returns the same categories each time.
+      params: {
+        count: 6
+      }
+    });
+    for (let i = 0; i < 6; i++) {
+      let category = response.data[i].category;
       this.categories.push(category);
     }
-    this.initClues();
-  }
-  async initClues() {
-    /*
-      Loop through categories array. Use category ID to make request to jservice API for clues.
-      Create a 'clues' key for each category object and assign clues object as value.
-    */
-    for (let i = 0; i <= 6; i++) {
+    for (let i = 0; i < 6; i++) { // get clues for categories from category IDs
       let id = this.categories[i].id;
       let responseWithClues = await axios.get(
-        "https://www.jservice.io/api/clues",
-        {
+        "https://www.jservice.io/api/clues", {
           params: {
             category: id,
           },
@@ -84,7 +73,6 @@ class Jeopardy {
       let clues = responseWithClues.data;
       this.categories[i]["clues"] = clues.slice(0, 5);
     }
-    this.categories.shift(); // ID of first category wasn't being stored so we create an extra Category instance and then shift() first category off categories array
   }
 }
 
@@ -95,8 +83,9 @@ class BrowserJeopardy extends Jeopardy {
   constructor() {
     super();
   }
-  makeTable() {
+  async makeTable() {
     // Make table  -> Make categories headings -> Append categories to table -> Make clue divs -> Append divs to table head element
+    await this.initCategories();
     let gameTable = document.createElement("table");
     document.body.append(gameTable);
     let categoriesRow = document.createElement("tr");
@@ -109,7 +98,7 @@ class BrowserJeopardy extends Jeopardy {
       categoryHeading.innerText = category;
       categoryHeading.id = i.toString();
       for (let j = 0; j < 5; j++) {
-        // Create divs for clues to append to a category heading
+        // Create divs with event listeners for clue answers to append to category headings
         let clueCell = document.createElement("div");
         let clue = this.categories[i].clues[j].question;
         let answer = this.categories[i].clues[j].answer;
